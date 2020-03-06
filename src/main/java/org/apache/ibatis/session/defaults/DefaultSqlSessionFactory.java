@@ -32,6 +32,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 
 /**
+ * 默认 SqlSessionFactory 实现类
  * @author Clinton Begin
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
@@ -44,6 +45,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   @Override
   public SqlSession openSession() {
+    //getDefaultExecutorType()传递的是SimpleExecutor
     return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
   }
 
@@ -74,6 +76,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   @Override
   public SqlSession openSession(Connection connection) {
+
     return openSessionFromConnection(configuration.getDefaultExecutorType(), connection);
   }
 
@@ -87,15 +90,30 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     return configuration;
   }
 
+
+
+  /**
+   *
+   * @param execType Executor的类型
+   * @param level 事务隔离级别
+   * @param autoCommit 是否开启事务
+   * @return
+   */
+  //openSession的多个重载方法可以指定获得的SqlSession的Executor类型和事务的处理
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
     Transaction tx = null;
     try {
+      //获的 Environment 对象
       final Environment environment = configuration.getEnvironment();
+      //创建 TransactionFactory 对象
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      //创建 Executor 对象
       final Executor executor = configuration.newExecutor(tx, execType);
+      //创建DefaultSqlSession 对象
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
+      //如果发生异常，则关闭 Transaction 对象
       closeTransaction(tx); // may have fetched a connection so lets call close()
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
     } finally {

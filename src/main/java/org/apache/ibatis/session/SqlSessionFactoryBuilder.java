@@ -60,7 +60,10 @@ public class SqlSessionFactoryBuilder {
     }
   }
 
+  //1.我们最初调用的build
   public SqlSessionFactory build(InputStream inputStream) {
+
+    //调用了重载方法
     return build(inputStream, null, null);
   }
 
@@ -72,9 +75,14 @@ public class SqlSessionFactoryBuilder {
     return build(inputStream, null, properties);
   }
 
+
+  //2.调用的重载方法
   public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
     try {
+      //创建XML ConfigBuilder,XML configBuilder 是专门解析MyBatis的配置文件的类
       XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+      //执行XML解析
+      //创建DefaultSqlSessionFactory对象
       return build(parser.parse());
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
@@ -88,8 +96,13 @@ public class SqlSessionFactoryBuilder {
     }
   }
 
+  /**
+   * 创建 DefaultSqlSessionFactory 对象
+   * @param config Configuration 对象
+   * @return DefaultSqlSessionFactory 对象
+   */
   public SqlSessionFactory build(Configuration config) {
-    return new DefaultSqlSessionFactory(config);
+    return new DefaultSqlSessionFactory(config);//构建者设计模式
   }
 
 }

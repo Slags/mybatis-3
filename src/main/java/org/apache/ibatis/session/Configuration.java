@@ -150,6 +150,9 @@ public class Configuration {
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
+  /**
+   * MappedStatement 映射
+   */
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")
       .conflictMessageProducer((savedValue, targetValue) ->
           ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
@@ -768,6 +771,7 @@ public class Configuration {
   }
 
   public void addMappers(String packageName) {
+    //扫描该包下所有的Mapper 接口  并添加到 mapperRegistry中
     mapperRegistry.addMappers(packageName);
   }
 

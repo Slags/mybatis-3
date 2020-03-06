@@ -130,6 +130,7 @@ public class DefaultSqlSession implements SqlSession {
     }
   }
 
+  //进入 selectList 方法，多个重载方法
   @Override
   public <E> List<E> selectList(String statement) {
     return this.selectList(statement, null);
@@ -143,7 +144,9 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
+      //获得 MappedStatement对象
       MappedStatement ms = configuration.getMappedStatement(statement);
+      //执行查询
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);

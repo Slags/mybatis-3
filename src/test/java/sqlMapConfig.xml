@@ -1,0 +1,8 @@
+<configuration>
+
+
+  <mappers>
+    <mapper class="com.fqcoder.mapper.IUserMapper"/>
+    <package name="com.fqcoder.mapper"/>
+  </mappers>
+</configuration>

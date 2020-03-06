@@ -181,19 +181,29 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
+    //多 ResultSet 的结果集合,每个ResultSet 对应一个Object 对象，实际上，每个Object 是List<Object>对象
+    //在不考虑存储过程的多ResultSet 的情况下，普通的查询，实际就一个ResultSet,也就是说，multipleResults最多就一个元素
     final List<Object> multipleResults = new ArrayList<>();
 
     int resultSetCount = 0;
+    //获得首个 ResultSet对象，并封装成 ResultSetWrapper对象
     ResultSetWrapper rsw = getFirstResultSet(stmt);
 
+    //获得ResultMap数组
+    //在不考虑存储过程的多ResultSet的情况  普通的查询，实际就是一个 ResultSet,也就是说resultMap 就一个元素
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
     int resultMapCount = resultMaps.size();
-    validateResultMapsCount(rsw, resultMapCount);
+    validateResultMapsCount(rsw, resultMapCount);//校验
     while (rsw != null && resultMapCount > resultSetCount) {
+      //获得ResultMap对象
       ResultMap resultMap = resultMaps.get(resultSetCount);
+      //处理ResultSet，将结果添加到multipleResults中
       handleResultSet(rsw, resultMap, multipleResults, null);
+      //获得下一个ResultSet对象，并封装成 ResultSetWrapper对象
       rsw = getNextResultSet(stmt);
+      //清理
       cleanUpAfterHandlingResultSet();
+      //resultSetCount++
       resultSetCount++;
     }
 
@@ -233,6 +243,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     return new DefaultCursor<>(this, resultMap, rsw, rowBounds);
   }
 
+  /**
+   * 将ResultSet 对象  封装成 ResultSetWrapper对象
+   * @param stmt Statement对象
+   * @return  ResultSetWrapper对象
+   * @throws SQLException
+   */
   private ResultSetWrapper getFirstResultSet(Statement stmt) throws SQLException {
     ResultSet rs = stmt.getResultSet();
     while (rs == null) {
@@ -247,6 +263,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
       }
     }
+    //将ResultSet对象，封装成ResultSetWrapper对象
     return rs != null ? new ResultSetWrapper(rs, configuration) : null;
   }
 
@@ -291,21 +308,28 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
+  //处理ResultSet  将结果添加到multipleResults中
   private void handleResultSet(ResultSetWrapper rsw, ResultMap resultMap, List<Object> multipleResults, ResultMapping parentMapping) throws SQLException {
     try {
       if (parentMapping != null) {
         handleRowValues(rsw, resultMap, null, RowBounds.DEFAULT, parentMapping);
       } else {
+        //如果没有自定义的resultHandler  则创建默认的DefaultResultHandler对象
         if (resultHandler == null) {
+          //创建 DefaultResultHandler对象
           DefaultResultHandler defaultResultHandler = new DefaultResultHandler(objectFactory);
+          //处理ResultSet  返回的每一行Row
           handleRowValues(rsw, resultMap, defaultResultHandler, rowBounds, null);
+          //添加 defaultResultHandler的处理结果，到mul对象tipleResults中
           multipleResults.add(defaultResultHandler.getResultList());
         } else {
+          //处理 ResultSet返回的每一行Row
           handleRowValues(rsw, resultMap, resultHandler, rowBounds, null);
         }
       }
     } finally {
       // issue #228 (close resultsets)
+      //关闭 ResultSet
       closeResultSet(rsw.getResultSet());
     }
   }
