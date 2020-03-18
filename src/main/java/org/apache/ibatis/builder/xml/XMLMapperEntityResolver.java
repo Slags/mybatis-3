@@ -26,18 +26,25 @@ import org.xml.sax.SAXException;
 
 /**
  * Offline entity resolver for the MyBatis DTDs.
+ * 用来加载本地的mybatis-3-cofing.dtd和Mybatis3-mapper.dtd两个文件
  *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class XMLMapperEntityResolver implements EntityResolver {
 
+
   private static final String IBATIS_CONFIG_SYSTEM = "ibatis-3-config.dtd";
   private static final String IBATIS_MAPPER_SYSTEM = "ibatis-3-mapper.dtd";
   private static final String MYBATIS_CONFIG_SYSTEM = "mybatis-3-config.dtd";
   private static final String MYBATIS_MAPPER_SYSTEM = "mybatis-3-mapper.dtd";
-
+  /**
+   * 本地mybatis-config.dtd文件
+   */
   private static final String MYBATIS_CONFIG_DTD = "org/apache/ibatis/builder/xml/mybatis-3-config.dtd";
+  /**
+   * 本地mybatis-mapper.dtd文件
+   */
   private static final String MYBATIS_MAPPER_DTD = "org/apache/ibatis/builder/xml/mybatis-3-mapper.dtd";
 
   /**
@@ -54,8 +61,10 @@ public class XMLMapperEntityResolver implements EntityResolver {
     try {
       if (systemId != null) {
         String lowerCaseSystemId = systemId.toLowerCase(Locale.ENGLISH);
+        //本地Mybatis-config.dtd文件
         if (lowerCaseSystemId.contains(MYBATIS_CONFIG_SYSTEM) || lowerCaseSystemId.contains(IBATIS_CONFIG_SYSTEM)) {
           return getInputSource(MYBATIS_CONFIG_DTD, publicId, systemId);
+        //本地mybatis-mapper.dtd文件
         } else if (lowerCaseSystemId.contains(MYBATIS_MAPPER_SYSTEM) || lowerCaseSystemId.contains(IBATIS_MAPPER_SYSTEM)) {
           return getInputSource(MYBATIS_MAPPER_DTD, publicId, systemId);
         }
@@ -67,11 +76,14 @@ public class XMLMapperEntityResolver implements EntityResolver {
   }
 
   private InputSource getInputSource(String path, String publicId, String systemId) {
+
     InputSource source = null;
     if (path != null) {
       try {
+        //创建InputSource对象
         InputStream in = Resources.getResourceAsStream(path);
         source = new InputSource(in);
+        //设置publicld、systemld属性
         source.setPublicId(publicId);
         source.setSystemId(systemId);
       } catch (IOException e) {

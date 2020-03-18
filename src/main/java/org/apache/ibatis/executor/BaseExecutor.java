@@ -348,6 +348,7 @@ public abstract class BaseExecutor implements Executor {
     return list;
   }
 
+  //数据库获取连接
   protected Connection getConnection(Log statementLog) throws SQLException {
     Connection connection = transaction.getConnection();
     if (statementLog.isDebugEnabled()) {
